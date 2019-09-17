@@ -39,6 +39,11 @@ screen_dcs() {
     tr -d '\n'
 }
 
+# Print an exact string with no extra newline.
+emit() {
+  printf "%s" "$*"
+}
+
 # Send an escape sequence to hterm.
 # Usage: <sequence>
 print_seq() {
@@ -58,7 +63,7 @@ print_seq() {
     tmux_dcs "${seq}"
     ;;
   *)
-    printf "%s" "${seq}"
+    emit "${seq}"
     ;;
   esac
 }
@@ -66,6 +71,11 @@ print_seq() {
 # Base64 encode stdin.
 b64enc() {
   base64 | tr -d '\n'
+}
+
+# Check if a command exists
+find_cmd() {
+  command -v "$1" >/dev/null 2>&1
 }
 
 # Send the OSC 52 sequence to copy the content.
@@ -81,6 +91,24 @@ copy() {
   fi
   seq="$(echo "${str}" | b64enc)"
 
+  # Send to X11 clipboard if we have an X display.
+  if [ -n "${DISPLAY:-}" ]; then
+    find_cmd xsel && emit "${str}" | xsel -i -b && exit 0
+    find_cmd xclip && emit "${str}" | xclip -i -selection clipboard && exit 0
+  fi
+
+  # If we're in a wayland session, try sending to wl-copy.
+  # See https://github.com/bugaevc/wl-clipboard
+  if [ "${XDG_SESSION_TYPE:-}" = "wayland" ]; then
+    find_cmd wl-copy && emit "${str}" | wl-copy -t text/plain && exit 0
+  fi
+
+  # If pbcopy exists, we're probably on a Mac and should use it.
+  find_cmd pbcopy && emit "${str}" | pbcopy && exit 0
+
+  # If none of the other commands succeeded, try spitting out an OSC52
+  # sequence in case the running terminal accepts it (kitty, iterm2, hterm, xterm,
+  # etc).
   local len=${#seq}
   if [ "${len}" -lt "${OSC_52_MAX_SEQUENCE}" ]; then
     # By default, kitty terminal concatenates successive pastes, so clear
