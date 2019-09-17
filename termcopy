@@ -81,6 +81,11 @@ copy() {
 
   local len=${#str}
   if [ ${len} -lt ${OSC_52_MAX_SEQUENCE} ]; then
+    # By default, kitty terminal concatenates successive pastes, so clear
+    # the clipboard first.  This shouldn't do any harm on other terminals.
+    # https://sw.kovidgoyal.net/kitty/protocol-extensions.html#pasting-to-clipboard
+    print_seq "$(printf '\033]52;c;!\a')"
+
     print_seq "$(printf '\033]52;c;%s\a' "${str}")"
   else
     die "selection too long to send to terminal:" \
