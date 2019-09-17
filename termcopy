@@ -95,7 +95,7 @@ usage() {
     exec 1>&2
   fi
   cat <<EOF
-Usage: osc52 [options] [string]
+Usage: $0 [options] [string]
 
 Send an arbitrary string to the terminal clipboard using the OSC 52 escape
 sequence as specified in xterm:
@@ -103,10 +103,10 @@ sequence as specified in xterm:
   Section "Operating System Controls", Ps => 52.
 
 The data can either be read from stdin:
-  $ echo "hello world" | osc52.sh
+  $ echo "hello world" | $0
 
 Or specified on the command line:
-  $ osc52.sh "hello world"
+  $ $0 "hello world"
 EOF
 
   if [ $# -gt 0 ]; then
