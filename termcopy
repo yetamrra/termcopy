@@ -85,11 +85,12 @@ copy() {
   local seq
 
   if [ $# -eq 0 ]; then
-    str="$(cat -)"
+    str="$(cat -; printf a)"
+    str="${str%a}"
   else
     str="$*"
   fi
-  seq="$(echo "${str}" | b64enc)"
+  seq="$(emit "${str}" | b64enc)"
 
   # Send to X11 clipboard if we have an X display.
   if [ -n "${DISPLAY:-}" ]; then
