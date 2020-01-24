@@ -45,7 +45,7 @@ makes tmux emit the same OSC 52 sequence to set the clipboard.  The second
 its inner `TERM` to `screen` or `screen-256color`.  The two terminal overrides
 may not be needed, or you may need an additional entry for your own `TERM`
 value, depending on the exact contents of your terminfo database.  I don't
-think it turns to include these even if your terminfo already has them.
+think it hurts to include these even if your terminfo already has them.
 
 ## kitty
 
